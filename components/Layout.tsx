@@ -400,7 +400,7 @@ export const Layout: React.FC = () => {
                 <span className="material-icons-round hidden dark:block">light_mode</span>
             </button>
             <div className="flex items-center gap-2 bg-gray-100 dark:bg-surface-darker py-1 px-3 rounded-full border border-gray-200 dark:border-gray-700 cursor-pointer" onClick={() => navigate('/app/profile')}>
-                <img src={IMAGES.adminAvatar} alt="Profile" className="w-6 h-6 rounded-full" />
+                <img src={user?.profile_picture_url || IMAGES.adminAvatar} alt="Profile" className="w-6 h-6 rounded-full object-cover" />
                 <span className="text-sm font-medium hidden sm:block">
                   {user?.nickname || user?.name || 'Usuário'} ({user?.role === 'admin' ? 'Mestre' : user?.role === 'professor' ? 'Professor' : 'Aluno'})
                 </span>

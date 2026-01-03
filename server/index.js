@@ -56,11 +56,28 @@ app.post('/api/seed', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const result = await pool.query('SELECT id, name, email, role, nickname FROM users WHERE email = $1 AND password = $2', [email, password]);
+    const result = await pool.query('SELECT id, name, email, role, nickname, phone, address, bio, profile_picture_url FROM users WHERE email = $1 AND password = $2', [email, password]);
     if (result.rows.length > 0) {
       res.json(result.rows[0]);
     } else {
       res.status(401).json({ error: 'E-mail ou senha inválidos' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/profile', async (req, res) => {
+  const { id, name, nickname, phone, address, bio, profile_picture_url } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE users SET name = $1, nickname = $2, phone = $3, address = $4, bio = $5, profile_picture_url = $6 WHERE id = $7 RETURNING id, name, email, role, nickname, phone, address, bio, profile_picture_url',
+      [name, nickname, phone, address, bio, profile_picture_url, id]
+    );
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ error: 'Usuário não encontrado' });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });

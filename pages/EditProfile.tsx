@@ -1,31 +1,80 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CAPOEIRA_RANKS } from '../constants';
 
 const IMAGES = {
-    // Avatar padrão para demonstração
     defaultAvatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBZ1iPHx7cYsAzOfSuCD9ONN-K8HMOf1Q_X4yi70mHnn50TFJEFBo4Hb8DHQoUkqYXM2K5ztTG9bvdyXH0W_z3gIxlUV2pvTOnzwl2TcsbKYhywlw2L7bNcdb_gHasQPa1ptz5Va0GcV9c-rsreEzdyMCui_auR4ECYQUy0yOQtKxRmnh9dVXBfaX51xysZ8dXxIhI5yISNiBsUTEJlefl-M2gd68HSTE8u9Rl-7gQb3sTxBJfbxq7cw1AevdvxFeptDPPApJiLIEU"
 };
-
-const PROFESSORS = [
-    "Mestre Anjo de Fogo",
-    "Mestre Wolverine",
-    "Mestrando ...",
-    "Professor Lion",
-    "Instrutor Aquiles",
-    "Instrutor Zeus"
-];
 
 export const EditProfile: React.FC = () => {
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [avatar, setAvatar] = useState(IMAGES.defaultAvatar);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
+    
+    const [formData, setFormData] = useState({
+        id: '',
+        name: '',
+        nickname: '',
+        phone: '',
+        address: '',
+        bio: '',
+        profile_picture_url: IMAGES.defaultAvatar
+    });
+
+    useEffect(() => {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            const user = JSON.parse(userStr);
+            setFormData({
+                id: user.id || '',
+                name: user.name || '',
+                nickname: user.nickname || '',
+                phone: user.phone || '',
+                address: user.address || '',
+                bio: user.bio || '',
+                profile_picture_url: user.profile_picture_url || IMAGES.defaultAvatar
+            });
+        }
+    }, []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setAvatar(imageUrl);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData(prev => ({ ...prev, profile_picture_url: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            const response = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('user', JSON.stringify(data));
+                window.dispatchEvent(new Event('storage'));
+                setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
+                setTimeout(() => navigate('/app/dashboard'), 1500);
+            } else {
+                setMessage({ type: 'error', text: data.error || 'Erro ao atualizar perfil' });
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: 'Erro de conexão com o servidor' });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -33,7 +82,6 @@ export const EditProfile: React.FC = () => {
         <div className="min-h-screen flex items-center justify-center bg-[#121212] p-4 font-sans">
             <div className="w-full max-w-[400px] bg-[#1E1E1E] rounded-2xl shadow-2xl overflow-hidden border border-white/5">
                 
-                {/* Gradient Header */}
                 <div className="relative bg-gradient-to-b from-[#EA4420] to-[#b91c1c] px-6 py-8 text-center">
                     <button 
                         onClick={() => navigate(-1)} 
@@ -47,7 +95,7 @@ export const EditProfile: React.FC = () => {
                         onClick={() => fileInputRef.current?.click()}
                     >
                          <img 
-                            src={avatar} 
+                            src={formData.profile_picture_url} 
                             className="w-full h-full object-cover transition-transform group-hover:scale-105" 
                             alt="Profile" 
                         />
@@ -67,80 +115,70 @@ export const EditProfile: React.FC = () => {
                     <p className="text-white/80 text-sm font-medium">Toque na foto para alterar</p>
                 </div>
                 
-                {/* Form Section */}
-                <form className="p-6 space-y-4 bg-[#1E1E1E]" onSubmit={(e) => e.preventDefault()}>
-                     
-                     {/* Nome */}
+                <form className="p-6 space-y-4 bg-[#1E1E1E]" onSubmit={handleSubmit}>
+                    {message.text && (
+                        <div className={`p-3 rounded-lg text-sm text-center ${message.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/50' : 'bg-red-500/10 text-red-500 border border-red-500/50'}`}>
+                            {message.text}
+                        </div>
+                    )}
+
                      <input 
                         type="text" 
-                        placeholder="Nome" 
+                        placeholder="Nome Completo" 
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
                         className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
+                        required
                     />
 
-                    {/* Sobrenome */}
-                    <input 
-                        type="text" 
-                        placeholder="Sobrenome" 
-                        className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
-                    />
-
-                    {/* Apelido */}
                     <input 
                         type="text" 
                         placeholder="Apelido (Capoeira)" 
+                        value={formData.nickname}
+                        onChange={(e) => setFormData({...formData, nickname: e.target.value})}
                         className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
                     />
 
-                    {/* Data de Nascimento */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Data de Nascimento</label>
-                        <input 
-                            type="date" 
-                            className="w-full bg-[#121212] border border-[#333] text-gray-400 rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm appearance-none" 
-                        />
-                    </div>
-
-                    {/* WhatsApp */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">WhatsApp (Ex: 5511999999999)</label>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">WhatsApp</label>
                         <input 
                             type="tel" 
-                            placeholder="55DDDNUMERO" 
+                            placeholder="Ex: 5511999999999" 
+                            value={formData.phone}
+                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
                             className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
                         />
                     </div>
 
-                    {/* Graduação */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Cordel / Graduação</label>
-                        <div className="relative">
-                            <select className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm appearance-none">
-                                <option value="">Cordel Cinza</option>
-                                {CAPOEIRA_RANKS.map((rank, index) => (
-                                    <option key={index} value={rank}>{rank}</option>
-                                ))}
-                            </select>
-                            <span className="absolute right-4 top-3.5 pointer-events-none material-icons-round text-gray-500 text-lg">expand_more</span>
-                        </div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Endereço</label>
+                        <input 
+                            type="text" 
+                            placeholder="Rua, Número, Cidade" 
+                            value={formData.address}
+                            onChange={(e) => setFormData({...formData, address: e.target.value})}
+                            className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
+                        />
                     </div>
 
-                    {/* Professor Responsável */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Professor Responsável</label>
-                        <div className="relative">
-                            <select className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm appearance-none">
-                                <option value="">Selecione seu professor</option>
-                                {PROFESSORS.map((prof, index) => (
-                                    <option key={index} value={prof}>{prof}</option>
-                                ))}
-                            </select>
-                            <span className="absolute right-4 top-3.5 pointer-events-none material-icons-round text-gray-500 text-lg">expand_more</span>
-                        </div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Sobre Mim (Bio)</label>
+                        <textarea 
+                            placeholder="Conte um pouco sobre sua trajetória na capoeira..." 
+                            value={formData.bio}
+                            onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                            className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500 min-h-[80px] resize-none" 
+                        />
                     </div>
                      
                      <div className="pt-4">
-                        <button className="w-full bg-[#EA4420] hover:bg-[#D13315] text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                            <span className="material-icons-round text-lg">save</span> Salvar
+                        <button 
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-[#EA4420] hover:bg-[#D13315] text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                            <span className="material-icons-round text-lg">{loading ? 'sync' : 'save'}</span> 
+                            {loading ? 'Salvando...' : 'Salvar Perfil'}
                         </button>
                      </div>
                 </form>

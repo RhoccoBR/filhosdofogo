@@ -49,5 +49,12 @@
   <body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 transition-colors duration-200">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
+    <script>
+      window.onload = () => {
+        if (!document.getElementById('root').hasChildNodes()) {
+          console.error('React root is empty - check index.tsx mounting');
+        }
+      };
+    </script>
   </body>
 </html>

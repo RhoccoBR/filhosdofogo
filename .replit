@@ -42,7 +42,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx ts-node server.ts"
+args = "npm run start-backend"
 waitForPort = 3001
 
 [[ports]]

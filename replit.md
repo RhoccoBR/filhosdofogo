@@ -13,12 +13,9 @@ A management system for the "Filhos do Fogo" Capoeira group. This is a React-bas
 ```
 /
 ├── components/       # Reusable React components
-│   └── Layout.tsx    # Main layout wrapper
 ├── pages/            # Page components
-│   ├── Landing.tsx   # Public landing page
-│   ├── Login.tsx     # Login page
-│   ├── DashboardHome.tsx
-│   └── ...           # Various dashboard pages
+├── server/           # Backend Express server
+│   └── index.ts      # Server entry point
 ├── App.tsx           # Main app with routing
 ├── index.tsx         # React entry point
 ├── index.html        # HTML template
@@ -28,15 +25,17 @@ A management system for the "Filhos do Fogo" Capoeira group. This is a React-bas
 ```
 
 ## Development
-- Run `npm run dev` to start the development server on port 5000
-- The app uses HashRouter for client-side routing
+- Run `npm run dev` to start the frontend on port 5000
+- Run `npm run start-backend` to start the backend on port 3001
+- Frontend proxies `/api` requests to the backend
 
 ## Routes
 - `/` - Landing page
 - `/login` - Login page
 - `/app/*` - Protected application routes (dashboard, events, users, etc.)
 
-## Deployment
-- Build: `npm run build`
-- Output: `dist/` directory
-- Static hosting deployment configured
+## Recent Changes
+- Integrated PostgreSQL database for user and class management.
+- Set up Express backend on port 3001 with API proxy in Vite.
+- Implemented database seeding for initial setup.
+- Structured backend code in `server/` directory.

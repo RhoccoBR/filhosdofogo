@@ -1,5 +1,5 @@
-import express from 'express';
-import pg from 'pg';
+import express, { Request, Response } from 'express';
+import { Pool } from 'pg';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
@@ -11,15 +11,15 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-const pool = new pg.Pool({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
-app.get('/api/users', async (req, res) => {
+app.get('/api/users', async (req: Request, res: Response) => {
   try {
     const result = await pool.query('SELECT id, name, email, role, rank FROM users');
     res.json(result.rows);
@@ -28,7 +28,7 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-app.get('/api/classes', async (req, res) => {
+app.get('/api/classes', async (req: Request, res: Response) => {
   try {
     const result = await pool.query('SELECT * FROM classes');
     res.json(result.rows);
@@ -37,15 +37,15 @@ app.get('/api/classes', async (req, res) => {
   }
 });
 
-app.post('/api/seed', async (req, res) => {
+app.post('/api/seed', async (req: Request, res: Response) => {
   try {
-    await pool.query("INSERT INTO users (name, email, password_hash, role, rank) VALUES ('Admin', 'admin@filhosdofogo.com', 'hash', 'admin', 'Mestre') ON CONFLICT DO NOTHING");
+    await pool.query("INSERT INTO users (name, email, password_hash, role, rank) VALUES ('Admin', 'admin@filhosdofogo.com', 'hash', 'admin', 'Mestre') ON CONFLICT (email) DO NOTHING");
     res.json({ message: 'Database seeded' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.listen(port, '0.0.0.0', () => {
+app.listen(port, () => {
   console.log(`Backend server running on port ${port}`);
 });

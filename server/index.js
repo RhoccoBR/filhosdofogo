@@ -19,7 +19,7 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/users', async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, name, email, role, rank FROM users');
+    const result = await pool.query('SELECT id, name, email, role, nickname FROM users');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });

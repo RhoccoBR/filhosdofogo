@@ -37,5 +37,7 @@ A management system for the "Filhos do Fogo" Capoeira group. This is a React-bas
 ## Recent Changes
 - Integrated PostgreSQL database for user and class management.
 - Set up Express backend on port 3001 with API proxy in Vite.
-- Implemented database seeding for initial setup.
-- Structured backend code in `server/` directory.
+- Implemented database-driven login system that validates credentials.
+- Created `PUT /api/profile` endpoint to update user personal data and profile picture.
+- Updated `EditProfile` component to persist data in the database and synchronize with `localStorage`.
+- Removed manual role-switching UI to ensure security based on database roles.

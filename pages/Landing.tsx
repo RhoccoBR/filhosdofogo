@@ -1,9 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const IMAGES = {
-    logo: "https://lh3.googleusercontent.com/aida-public/AB6AXuBZ1iPHx7cYsAzOfSuCD9ONN-K8HMOf1Q_X4yi70mHnn50TFJEFBo4Hb8DHQoUkqYXM2K5ztTG9bvdyXH0W_z3gIxlUV2pvTOnzwl2TcsbKYhywlw2L7bNcdb_gHasQPa1ptz5Va0GcV9c-rsreEzdyMCui_auR4ECYQUy0yOQtKxRmnh9dVXBfaX51xysZ8dXxIhI5yISNiBsUTEJlefl-M2gd68HSTE8u9Rl-7gQb3sTxBJfbxq7cw1AevdvxFeptDPPApJiLIEU"
-};
+import { APP_LOGO } from '../constants';
 
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -11,11 +8,23 @@ export const Landing: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#121212] text-gray-100 font-sans selection:bg-orange-500/30">
       
+      {/* Styles for Custom Animation */}
+      <style>{`
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+          100% { transform: translateY(0px); }
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+      `}</style>
+
       {/* Navbar */}
       <nav className="w-full px-6 py-4 flex justify-between items-center border-b border-white/5 bg-[#121212]/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full overflow-hidden border border-orange-600/50">
-                <img src={IMAGES.logo} alt="Logo Pequeno" className="w-full h-full object-cover" />
+                <img src={APP_LOGO} alt="Logo Pequeno" className="w-full h-full object-cover" />
             </div>
             <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-red-500">
                 Filhos do Fogo
@@ -31,15 +40,17 @@ export const Landing: React.FC = () => {
 
       {/* Hero Section */}
       <main className="flex-grow flex flex-col items-center justify-center px-4 py-12 text-center relative overflow-hidden">
-        {/* Background Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+        {/* Background Glow - Pulsing Fire Effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-gradient-to-r from-orange-600/30 to-red-600/30 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none animate-pulse"></div>
 
-        {/* Main Logo */}
-        <div className="relative w-64 h-64 sm:w-80 sm:h-80 mb-8 animate-fade-in">
+        {/* Main Logo with Floating Effect */}
+        <div className="relative w-64 h-64 sm:w-80 sm:h-80 mb-8 animate-float transition-all duration-500 hover:scale-110 hover:drop-shadow-[0_0_35px_rgba(234,68,32,0.6)] cursor-pointer group">
+            {/* Inner Glow to accentuate logo shape */}
+            <div className="absolute inset-0 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
             <img 
-                src={IMAGES.logo} 
+                src={APP_LOGO} 
                 alt="Grupo de Capoeira Filhos do Fogo" 
-                className="w-full h-full object-contain drop-shadow-2xl"
+                className="w-full h-full object-contain drop-shadow-2xl relative z-10"
             />
         </div>
 

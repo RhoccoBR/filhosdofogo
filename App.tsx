@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
@@ -22,22 +22,6 @@ import { StudentDashboard } from './pages/StudentDashboard';
 import { Training } from './pages/Training';
 import { SchoolReport } from './pages/SchoolReport';
 
-const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  const location = useLocation();
-
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/app/dashboard" replace />;
-  }
-
-  return <>{children}</>;
-};
-
 const App: React.FC = () => {
   return (
     <HashRouter>
@@ -46,16 +30,12 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         
         {/* Protected Application Routes */}
-        <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        <Route path="/app" element={<Layout />}>
           <Route index element={<Navigate to="/app/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardHome />} />
           <Route path="student-dashboard" element={<StudentDashboard />} />
           <Route path="events" element={<Events />} />
-          <Route path="users" element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <Users />
-            </ProtectedRoute>
-          } />
+          <Route path="users" element={<Users />} />
           <Route path="users/:id" element={<StudentDetails />} />
           <Route path="financial" element={<Financial />} />
           <Route path="pedagogical" element={<Pedagogical />} />

@@ -1,3 +1,6 @@
+// URL da Logo do App - Altere aqui para atualizar em todo o sistema
+export const APP_LOGO = "https://i.imgur.com/5bEqYYA.png";
+
 export const CAPOEIRA_RANKS = [
     "Cordel Cinza (Iniciante)",
     "Cordel Verde",

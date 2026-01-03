@@ -1,104 +1,135 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CAPOEIRA_RANKS } from '../constants';
+import { supabase, DatabaseUser } from '../services/supabase';
+import { OFFICIAL_USERS_LIST } from '../services/officialData';
 
-// Mock Initial Data
-const INITIAL_USERS = [
-    {
-        id: 1,
-        name: "Anjo de Fogo",
-        realName: "Marcos Antonio Soares",
-        email: "marcos@email.com",
-        rank: "Cordel Azul e Branco (Mestre III)",
-        role: "ADMIN",
-        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBLzx2hIk4vr2-CEl6NORrBasPVq33rAE6ux2udwsWKZ_Dd7AJfZefX9jYbg0Rkf2J7Hsj9lbUrzhMniCMC7OwyHS76us9ekMofPVm6FiF1_ylG-lQLX6hzl-utknsYTyBzr7Xl08YiA4tmK41YSrln7K6Ct-eQ5CV4sN3nuQ6pSbx1SZ0GNNu36TzK867FXn35yhT1QXXNna8mAyfCjyvL6Uh4ZkCaGbwGnoWt1xpvG68jxtsRyyGNv8csZoklZPQFLUMbWUo2THk",
-    },
-    {
-        id: 2,
-        name: "Wolverine",
-        realName: "Adriano de Freitas",
-        email: "adriano@email.com",
-        rank: "Cordel Verde e Branco (Mestre I)",
-        role: "ADMIN",
-        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDHz94nMRkGVt-Wmz0jYgnAJrJPG2Q9eIWgQ8B5wCKXMDYoDVqWy59-QmIdYj2NJ4_T_eG-wAeqym3oVr_K8uFZzAgdBMgUaw3Oe70AB0VIJNDKvR33deKW00slPax3YbW_CDSDeBBXfhKuTrYALsftKzIoY0D17dnDtaEuZoS8wSprHJvuxhKEZu5LpPu1WZol8GOip9wQb-dRBoVGTDFr7MXHE-VmoZMznj0c1ENkmKosAKTEnlONJFnhQ8DMarg5HsyQW6uBfe8",
-    },
-    {
-        id: 3,
-        name: "Zeus",
-        realName: "Jefferson dos Santos",
-        email: "jefferson@email.com",
-        rank: "Cordel Amarelo e Azul (Instrutor)",
-        role: "PROFESSOR",
-        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCABU_9z4Hhlu1-_kENghwAQs_U2NisYfVABZvKbE24wQ8HHWUq_dA_NtYzYafSkU_R03DgAySrqO8IcvqxN8nHrzqT2OuW4x5LW5X5d3RLlQu0vTbsTYAhoS-IFYjg5UveUXBX8NX1Ow885hujLPbFrBaXrqcvuwFIsHt9e4rL0T2mmtGNGF-Oo7B552yGcQPfusRULd32AMef0AT03BuLGpdBLBT-qu71Jr7Ys0K1ithTHb_ZCTnYXm1KQGbYOeI5HFLm9IWBrYk",
-    },
-    {
-        id: 4,
-        name: "Menor",
-        realName: "Menor Teste",
-        email: "menor@email.com",
-        rank: "Cordel Verde e Amarelo",
-        role: "STUDENT",
-        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCk1AfptQ28cUm3y0Vu2Mj3k-4qcv_pM4xEKppEp2awACmXxfd3Eez1_-k7wY5Xy6uIVPFInE5DNw_XzAbp_lhHXExzzZUh76pe0nR7JTettpEMLWW2iRwAd-bCcwsABkw1LFGajMW6y3619gLjyM5DtkQcXRgu138g32h0CnyoQCh7WU8xpwxefZAQtrSd3XowsRtJUKTNEz2_ArDvR4ADT4zShfiIMw8hL7ujnOrrNwAcWycOMSGOmqThmndOCVZzvWhT5db_ufI",
-    }
-];
-
-interface UserFormState {
-    id?: number;
-    name: string;
-    realName: string;
-    email: string;
-    rank: string;
-    role: string;
-}
-
-const DEFAULT_FORM: UserFormState = {
+// Valor padrão para formulário
+const DEFAULT_FORM: DatabaseUser = {
     name: '',
-    realName: '',
+    real_name: '',
     email: '',
     rank: CAPOEIRA_RANKS[0],
-    role: 'STUDENT'
+    role: 'STUDENT',
+    avatar: ''
 };
 
 export const Users: React.FC = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState<DatabaseUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [importing, setImporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState<UserFormState>(DEFAULT_FORM);
+  const [formData, setFormData] = useState<DatabaseUser>(DEFAULT_FORM);
   const [isEditing, setIsEditing] = useState(false);
   
   // Avatar Upload State
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter Logic
-  const filteredUsers = useMemo(() => {
-    return users.filter(user => 
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.realName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [users, searchTerm]);
+  // --- SUPABASE INTEGRATION ---
 
-  // Handlers
-  const handleDelete = (id: number) => {
-      if (window.confirm("Tem certeza que deseja remover este usuário?")) {
-          setUsers(users.filter(u => u.id !== id));
+  // 1. Fetch Users (READ)
+  const fetchUsers = async () => {
+      setLoading(true);
+      try {
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .order('id', { ascending: false });
+          
+          if (error) throw error;
+          if (data) setUsers(data as DatabaseUser[]);
+      } catch (error) {
+          console.error("Erro ao buscar usuários:", error);
+          alert("Erro ao conectar com o banco de dados. Verifique as chaves no arquivo services/supabase.ts");
+      } finally {
+          setLoading(false);
       }
   };
 
-  const handleEdit = (user: typeof INITIAL_USERS[0]) => {
+  useEffect(() => {
+      fetchUsers();
+  }, []);
+
+  // 2. Import Official List Logic
+  const handleImportOfficialList = async () => {
+      if (!window.confirm("Isso adicionará a lista oficial de Admins e Professores ao banco de dados se eles ainda não existirem (baseado no email). Deseja continuar?")) {
+          return;
+      }
+
+      setImporting(true);
+      let addedCount = 0;
+      let skippedCount = 0;
+
+      try {
+          for (const officialUser of OFFICIAL_USERS_LIST) {
+              // Verifica se já existe pelo email
+              const { data: existing } = await supabase
+                  .from('users')
+                  .select('id')
+                  .eq('email', officialUser.email)
+                  .single();
+
+              if (!existing) {
+                  const { error } = await supabase.from('users').insert([officialUser]);
+                  if (error) {
+                      console.error(`Erro ao adicionar ${officialUser.name}:`, error);
+                  } else {
+                      addedCount++;
+                  }
+              } else {
+                  skippedCount++;
+              }
+          }
+          
+          alert(`Importação concluída!\nAdicionados: ${addedCount}\nJá existentes (ignorados): ${skippedCount}`);
+          fetchUsers(); // Atualiza a lista na tela
+
+      } catch (error) {
+          console.error("Erro na importação:", error);
+          alert("Ocorreu um erro durante a importação.");
+      } finally {
+          setImporting(false);
+      }
+  };
+
+  // 3. Filter Logic (Client side for better performance on small lists)
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => 
+        (user.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (user.real_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+    );
+  }, [users, searchTerm]);
+
+  // 4. Handlers Actions
+  const handleDelete = async (id?: number) => {
+      if (!id) return;
+      if (window.confirm("Tem certeza que deseja remover este usuário do banco de dados?")) {
+          const { error } = await supabase.from('users').delete().eq('id', id);
+          if (error) {
+              alert("Erro ao deletar usuário");
+          } else {
+              setUsers(users.filter(u => u.id !== id));
+          }
+      }
+  };
+
+  const handleEdit = (user: DatabaseUser) => {
       setFormData({
           id: user.id,
           name: user.name,
-          realName: user.realName,
+          real_name: user.real_name,
           email: user.email,
           rank: user.rank,
-          role: user.role
+          role: user.role,
+          avatar: user.avatar
       });
-      setPreviewAvatar(user.avatar);
+      setPreviewAvatar(user.avatar || null);
       setIsEditing(true);
       setIsModalOpen(true);
   };
@@ -113,41 +144,82 @@ export const Users: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
+          // Nota: Em uma app real, você faria upload para o Supabase Storage aqui.
+          // Para simplificar, estamos usando URL local temporária ou um placeholder.
           const imageUrl = URL.createObjectURL(file);
           setPreviewAvatar(imageUrl);
       }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 5. Submit (CREATE or UPDATE)
+  const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       
       const userAvatar = previewAvatar || `https://ui-avatars.com/api/?name=${formData.name.replace(' ', '+')}&background=random&color=fff`;
+      
+      const payload = {
+          name: formData.name,
+          real_name: formData.real_name,
+          email: formData.email,
+          rank: formData.rank,
+          role: formData.role,
+          avatar: userAvatar
+      };
 
       if (isEditing && formData.id) {
-          // Update existing
-          setUsers(users.map(u => u.id === formData.id ? { ...u, ...formData, avatar: userAvatar } : u));
+          // Update
+          const { error } = await supabase
+            .from('users')
+            .update(payload)
+            .eq('id', formData.id);
+            
+          if (error) alert("Erro ao atualizar: " + error.message);
+          else {
+              fetchUsers(); // Refresh list
+              setIsModalOpen(false);
+          }
       } else {
-          // Add new
-          const newUser = {
-              ...formData,
-              id: Date.now(),
-              avatar: userAvatar
-          };
-          setUsers([newUser, ...users]);
+          // Create
+          const { error } = await supabase
+            .from('users')
+            .insert([payload]);
+
+          if (error) alert("Erro ao criar: " + error.message);
+          else {
+              fetchUsers(); // Refresh list
+              setIsModalOpen(false);
+          }
       }
-      setIsModalOpen(false);
   };
 
   return (
     <div className="space-y-6 pb-24 relative">
-        <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-                <span className="material-icons-round text-pink-500">manage_accounts</span>
-                Gerenciar Usuários
-            </h1>
-            <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full text-xs font-bold text-gray-500">
-                {users.length} Total
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+            <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                    <span className="material-icons-round text-pink-500">manage_accounts</span>
+                    Gerenciar Usuários
+                </h1>
+                <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                    <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-xs font-bold">
+                        {users.length} Total
+                    </span>
+                </p>
             </div>
+            
+            {/* Import Button */}
+            <button 
+                onClick={handleImportOfficialList}
+                disabled={importing}
+                className={`flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg font-bold text-xs shadow-md transition-all ${importing ? 'cursor-wait' : ''}`}
+            >
+                {importing ? (
+                    <span className="material-icons-round animate-spin text-sm">refresh</span>
+                ) : (
+                    <span className="material-icons-round text-sm">cloud_download</span>
+                )}
+                {importing ? 'Importando...' : 'Importar Lista Oficial'}
+            </button>
         </div>
 
         {/* Search Bar */}
@@ -166,10 +238,15 @@ export const Users: React.FC = () => {
 
         {/* User List */}
         <div className="space-y-4">
-            {filteredUsers.length === 0 ? (
+            {loading ? (
+                <div className="text-center py-10 text-gray-400 animate-pulse">
+                    <span className="material-icons-round text-4xl mb-2 animate-spin">sync</span>
+                    <p>Carregando banco de dados...</p>
+                </div>
+            ) : filteredUsers.length === 0 ? (
                 <div className="text-center py-10 text-gray-400">
                     <span className="material-icons-round text-4xl mb-2 opacity-30">search_off</span>
-                    <p>Nenhum usuário encontrado.</p>
+                    <p>Nenhum usuário encontrado no banco de dados.</p>
                 </div>
             ) : (
                 filteredUsers.map(user => (
@@ -178,10 +255,10 @@ export const Users: React.FC = () => {
                         
                         <div className="flex justify-between items-start mb-4 pl-2">
                             <div className="flex items-center gap-3">
-                                <img src={user.avatar} alt={user.name} className="h-12 w-12 rounded-full object-cover border-2 border-surface-light dark:border-surface-dark shadow-sm bg-gray-200" />
+                                <img src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}`} alt={user.name} className="h-12 w-12 rounded-full object-cover border-2 border-surface-light dark:border-surface-dark shadow-sm bg-gray-200" />
                                 <div>
                                     <h3 className="font-bold text-base leading-tight">{user.name}</h3>
-                                    <p className="text-xs text-gray-500">{user.realName}</p>
+                                    <p className="text-xs text-gray-500">{user.real_name}</p>
                                 </div>
                             </div>
                             <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase ${
@@ -288,8 +365,8 @@ export const Users: React.FC = () => {
                                     <input 
                                         type="text" 
                                         required
-                                        value={formData.realName}
-                                        onChange={(e) => setFormData({...formData, realName: e.target.value})}
+                                        value={formData.real_name}
+                                        onChange={(e) => setFormData({...formData, real_name: e.target.value})}
                                         className="w-full bg-gray-50 dark:bg-surface-darker border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                                         placeholder="Ex: João da Silva"
                                     />
@@ -319,7 +396,7 @@ export const Users: React.FC = () => {
                                         <button
                                             key={role.id}
                                             type="button"
-                                            onClick={() => setFormData({...formData, role: role.id})}
+                                            onClick={() => setFormData({...formData, role: role.id as any})}
                                             className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
                                                 formData.role === role.id 
                                                 ? 'bg-primary/10 border-primary text-primary' 

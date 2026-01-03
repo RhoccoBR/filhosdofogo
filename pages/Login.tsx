@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const IMAGES = {
@@ -7,6 +7,38 @@ const IMAGES = {
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('user', JSON.stringify(data));
+        // Redirect based on role from database
+        if (data.role === 'admin' || data.role === 'professor') {
+          navigate('/app/dashboard');
+        } else {
+          navigate('/app/student-dashboard');
+        }
+      } else {
+        setError(data.error || 'Erro ao fazer login');
+      }
+    } catch (err) {
+      setError('Erro de conexão com o servidor');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212] p-4 font-sans">
@@ -34,16 +66,23 @@ export const Login: React.FC = () => {
 
             <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Acesse sua Conta</h1>
             <p className="text-white/80 text-sm font-medium leading-relaxed max-w-xs mx-auto">
-                Entre ou crie uma conta para acessar seu painel
+                Entre para acessar seu painel personalizado
             </p>
         </div>
 
         {/* Form Section */}
         <div className="p-8 space-y-6 bg-[#1E1E1E]">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm text-center">
+                {error}
+              </div>
+            )}
             <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-400 pl-1">Seu Email</label>
                 <input 
                     type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="seu@email.com" 
                     className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3.5 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-600" 
                 />
@@ -53,24 +92,24 @@ export const Login: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-400 pl-1">Sua Senha</label>
                 <input 
                     type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••" 
                     className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3.5 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-600 tracking-widest" 
                 />
             </div>
 
             <button 
-                onClick={() => navigate('/app/dashboard')}
-                className="w-full bg-[#EA4420] hover:bg-[#D13315] text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all active:scale-[0.98] mt-2 text-base"
+                onClick={handleLogin}
+                disabled={loading}
+                className="w-full bg-[#EA4420] hover:bg-[#D13315] text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all active:scale-[0.98] mt-2 text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                Entrar
+                {loading ? 'Entrando...' : 'Entrar'}
             </button>
 
             <div className="flex flex-col items-center gap-4 mt-6 text-sm pt-2">
                 <button className="text-gray-500 hover:text-gray-300 hover:underline transition-colors decoration-gray-500">
                     Esqueceu sua senha?
-                </button>
-                <button className="text-gray-500 hover:text-[#EA4420] transition-colors">
-                    Não tem uma conta? <span className="underline decoration-gray-500 hover:decoration-[#EA4420]">Cadastre-se</span>
                 </button>
             </div>
         </div>

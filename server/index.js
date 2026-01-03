@@ -53,6 +53,20 @@ app.post('/api/seed', async (req, res) => {
   }
 });
 
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const result = await pool.query('SELECT id, name, email, role, nickname FROM users WHERE email = $1 AND password = $2', [email, password]);
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(401).json({ error: 'E-mail ou senha inválidos' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log('Backend server running on port ' + port);
 });

@@ -85,6 +85,9 @@ export const Layout: React.FC = () => {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
 
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+
   const toggleTheme = () => {
     document.documentElement.classList.toggle('dark');
   };
@@ -92,13 +95,23 @@ export const Layout: React.FC = () => {
   // Derived Translations
   const t = TRANSLATIONS[currentLang.code as keyof typeof TRANSLATIONS];
 
-  const navItems = useMemo(() => [
-    { id: 'dashboard', icon: 'dashboard', label: t.dashboard, path: '/app/dashboard' },
-    { id: 'events', icon: 'event', label: t.events, path: '/app/events' },
-    { id: 'users', icon: 'manage_accounts', label: t.users, path: '/app/users' },
-    { id: 'financial', icon: 'attach_money', label: t.financial, path: '/app/financial' },
-    { id: 'classes', icon: 'fitness_center', label: t.classes, path: '/app/classes' },
-  ], [t]);
+  const navItems = useMemo(() => {
+    const items = [
+      { id: 'dashboard', icon: 'dashboard', label: t.dashboard, path: '/app/dashboard' },
+      { id: 'events', icon: 'event', label: t.events, path: '/app/events' },
+    ];
+
+    if (user?.role === 'admin') {
+      items.push({ id: 'users', icon: 'manage_accounts', label: t.users, path: '/app/users' });
+    }
+
+    items.push(
+      { id: 'financial', icon: 'attach_money', label: t.financial, path: '/app/financial' },
+      { id: 'classes', icon: 'fitness_center', label: t.classes, path: '/app/classes' }
+    );
+
+    return items;
+  }, [t, user]);
 
   // Initialize Notifications & Mock Data
   useEffect(() => {
@@ -372,9 +385,14 @@ export const Layout: React.FC = () => {
             </button>
             <div className="flex items-center gap-2 bg-gray-100 dark:bg-surface-darker py-1 px-3 rounded-full border border-gray-200 dark:border-gray-700 cursor-pointer" onClick={() => navigate('/app/profile')}>
                 <img src={IMAGES.adminAvatar} alt="Profile" className="w-6 h-6 rounded-full" />
-                <span className="text-sm font-medium hidden sm:block">Aquiles (Instrutor)</span>
+                <span className="text-sm font-medium hidden sm:block">
+                  {user?.nickname || user?.name || 'Usuário'} ({user?.role === 'admin' ? 'Mestre' : user?.role === 'professor' ? 'Professor' : 'Aluno'})
+                </span>
             </div>
-            <button onClick={() => navigate('/')} className="text-gray-500 hover:text-red-500">
+            <button onClick={() => {
+              localStorage.removeItem('user');
+              navigate('/');
+            }} className="text-gray-500 hover:text-red-500">
                 <span className="material-icons-round">logout</span>
             </button>
         </div>

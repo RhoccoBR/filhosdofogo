@@ -78,10 +78,39 @@ export const EditProfile: React.FC = () => {
         }
     };
 
+    const [avatar, setAvatar] = useState(formData.profile_picture_url || IMAGES.defaultAvatar);
+
+    useEffect(() => {
+        setAvatar(formData.profile_picture_url || IMAGES.defaultAvatar);
+    }, [formData.profile_picture_url]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                setAvatar(base64String);
+                setFormData(prev => ({ ...prev, profile_picture_url: base64String }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const PROFESSORS = [
+        "Mestre Anjo de Fogo",
+        "Mestre Wolverine",
+        "Mestrando ...",
+        "Professor Lion",
+        "Instrutor Aquiles",
+        "Instrutor Zeus"
+    ];
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#121212] p-4 font-sans">
             <div className="w-full max-w-[400px] bg-[#1E1E1E] rounded-2xl shadow-2xl overflow-hidden border border-white/5">
                 
+                {/* Gradient Header */}
                 <div className="relative bg-gradient-to-b from-[#EA4420] to-[#b91c1c] px-6 py-8 text-center">
                     <button 
                         onClick={() => navigate(-1)} 
@@ -95,7 +124,7 @@ export const EditProfile: React.FC = () => {
                         onClick={() => fileInputRef.current?.click()}
                     >
                          <img 
-                            src={formData.profile_picture_url} 
+                            src={avatar} 
                             className="w-full h-full object-cover transition-transform group-hover:scale-105" 
                             alt="Profile" 
                         />
@@ -115,22 +144,25 @@ export const EditProfile: React.FC = () => {
                     <p className="text-white/80 text-sm font-medium">Toque na foto para alterar</p>
                 </div>
                 
+                {/* Form Section */}
                 <form className="p-6 space-y-4 bg-[#1E1E1E]" onSubmit={handleSubmit}>
                     {message.text && (
                         <div className={`p-3 rounded-lg text-sm text-center ${message.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/50' : 'bg-red-500/10 text-red-500 border border-red-500/50'}`}>
                             {message.text}
                         </div>
                     )}
-
+                     
+                     {/* Nome */}
                      <input 
                         type="text" 
-                        placeholder="Nome Completo" 
+                        placeholder="Nome" 
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                         className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
                         required
                     />
 
+                    {/* Apelido */}
                     <input 
                         type="text" 
                         placeholder="Apelido (Capoeira)" 
@@ -139,36 +171,44 @@ export const EditProfile: React.FC = () => {
                         className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
                     />
 
+                    {/* WhatsApp */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">WhatsApp</label>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">WhatsApp (Ex: 5511999999999)</label>
                         <input 
                             type="tel" 
-                            placeholder="Ex: 5511999999999" 
+                            placeholder="55DDDNUMERO" 
                             value={formData.phone}
                             onChange={(e) => setFormData({...formData, phone: e.target.value})}
                             className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
                         />
                     </div>
 
+                    {/* Graduação (Apenas visual conforme original) */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Endereço</label>
-                        <input 
-                            type="text" 
-                            placeholder="Rua, Número, Cidade" 
-                            value={formData.address}
-                            onChange={(e) => setFormData({...formData, address: e.target.value})}
-                            className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
-                        />
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Cordel / Graduação</label>
+                        <div className="relative">
+                            <select className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm appearance-none">
+                                <option value="">Cordel Cinza</option>
+                                {CAPOEIRA_RANKS.map((rank, index) => (
+                                    <option key={index} value={rank}>{rank}</option>
+                                ))}
+                            </select>
+                            <span className="absolute right-4 top-3.5 pointer-events-none material-icons-round text-gray-500 text-lg">expand_more</span>
+                        </div>
                     </div>
 
+                    {/* Professor Responsável (Apenas visual conforme original) */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Sobre Mim (Bio)</label>
-                        <textarea 
-                            placeholder="Conte um pouco sobre sua trajetória na capoeira..." 
-                            value={formData.bio}
-                            onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                            className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500 min-h-[80px] resize-none" 
-                        />
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Professor Responsável</label>
+                        <div className="relative">
+                            <select className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm appearance-none">
+                                <option value="">Selecione seu professor</option>
+                                {PROFESSORS.map((prof, index) => (
+                                    <option key={index} value={prof}>{prof}</option>
+                                ))}
+                            </select>
+                            <span className="absolute right-4 top-3.5 pointer-events-none material-icons-round text-gray-500 text-lg">expand_more</span>
+                        </div>
                     </div>
                      
                      <div className="pt-4">
@@ -178,7 +218,7 @@ export const EditProfile: React.FC = () => {
                             className="w-full bg-[#EA4420] hover:bg-[#D13315] text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             <span className="material-icons-round text-lg">{loading ? 'sync' : 'save'}</span> 
-                            {loading ? 'Salvando...' : 'Salvar Perfil'}
+                            {loading ? 'Salvando...' : 'Salvar'}
                         </button>
                      </div>
                 </form>

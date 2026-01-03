@@ -1,0 +1,7 @@
+{
+  "name": "Filhos do Fogo Manager",
+  "description": "A comprehensive management system for the Capoeira group Filhos do Fogo, including student tracking, financial management, and class scheduling.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

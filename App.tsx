@@ -1,7 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-
-// ... other imports ...
+import { Layout } from './components/Layout';
+import { Landing } from './pages/Landing';
+import { Login } from './pages/Login';
+import { DashboardHome } from './pages/DashboardHome';
+import { Events } from './pages/Events';
+import { Users } from './pages/Users';
+import { StudentDetails } from './pages/StudentDetails';
+import { Financial } from './pages/Financial';
+import { Pedagogical } from './pages/Pedagogical';
+import { Grades } from './pages/Grades';
+import { MyClasses } from './pages/MyClasses';
+import { MusicLibrary } from './pages/MusicLibrary';
+import { Works } from './pages/Works';
+import { EditProfile } from './pages/EditProfile';
+import { StudentsList } from './pages/StudentsList';
+import { CreateClass } from './pages/CreateClass';
+import { Uniforms } from './pages/Uniforms';
+import { Reports } from './pages/Reports';
+import { StudentDashboard } from './pages/StudentDashboard';
+import { Training } from './pages/Training';
+import { SchoolReport } from './pages/SchoolReport';
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
   const userStr = localStorage.getItem('user');

@@ -92,7 +92,17 @@ export const Layout: React.FC = () => {
     }
   }, [user, location.pathname, navigate]);
   
+  // Language State
+  const [currentLang, setCurrentLang] = useState(LANGUAGES[0]);
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
   // Notification State
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
+  const notificationPanelRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLButtonElement>(null);
 
   const toggleTheme = () => {
     document.documentElement.classList.toggle('dark');

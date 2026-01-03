@@ -22,6 +22,8 @@ export const EditProfile: React.FC = () => {
         profile_picture_url: IMAGES.defaultAvatar
     });
 
+    const [avatar, setAvatar] = useState(IMAGES.defaultAvatar);
+
     useEffect(() => {
         const userStr = localStorage.getItem('user');
         if (userStr) {
@@ -35,6 +37,7 @@ export const EditProfile: React.FC = () => {
                 bio: user.bio || '',
                 profile_picture_url: user.profile_picture_url || IMAGES.defaultAvatar
             });
+            setAvatar(user.profile_picture_url || IMAGES.defaultAvatar);
         }
     }, []);
 
@@ -43,7 +46,9 @@ export const EditProfile: React.FC = () => {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setFormData(prev => ({ ...prev, profile_picture_url: reader.result as string }));
+                const base64String = reader.result as string;
+                setAvatar(base64String);
+                setFormData(prev => ({ ...prev, profile_picture_url: base64String }));
             };
             reader.readAsDataURL(file);
         }
@@ -78,25 +83,6 @@ export const EditProfile: React.FC = () => {
         }
     };
 
-    const [avatar, setAvatar] = useState(formData.profile_picture_url || IMAGES.defaultAvatar);
-
-    useEffect(() => {
-        setAvatar(formData.profile_picture_url || IMAGES.defaultAvatar);
-    }, [formData.profile_picture_url]);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
-                setAvatar(base64String);
-                setFormData(prev => ({ ...prev, profile_picture_url: base64String }));
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const PROFESSORS = [
         "Mestre Anjo de Fogo",
         "Mestre Wolverine",
@@ -110,7 +96,6 @@ export const EditProfile: React.FC = () => {
         <div className="min-h-screen flex items-center justify-center bg-[#121212] p-4 font-sans">
             <div className="w-full max-w-[400px] bg-[#1E1E1E] rounded-2xl shadow-2xl overflow-hidden border border-white/5">
                 
-                {/* Gradient Header */}
                 <div className="relative bg-gradient-to-b from-[#EA4420] to-[#b91c1c] px-6 py-8 text-center">
                     <button 
                         onClick={() => navigate(-1)} 
@@ -144,7 +129,6 @@ export const EditProfile: React.FC = () => {
                     <p className="text-white/80 text-sm font-medium">Toque na foto para alterar</p>
                 </div>
                 
-                {/* Form Section */}
                 <form className="p-6 space-y-4 bg-[#1E1E1E]" onSubmit={handleSubmit}>
                     {message.text && (
                         <div className={`p-3 rounded-lg text-sm text-center ${message.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/50' : 'bg-red-500/10 text-red-500 border border-red-500/50'}`}>
@@ -152,7 +136,6 @@ export const EditProfile: React.FC = () => {
                         </div>
                     )}
                      
-                     {/* Nome */}
                      <input 
                         type="text" 
                         placeholder="Nome" 
@@ -162,7 +145,6 @@ export const EditProfile: React.FC = () => {
                         required
                     />
 
-                    {/* Apelido */}
                     <input 
                         type="text" 
                         placeholder="Apelido (Capoeira)" 
@@ -171,7 +153,6 @@ export const EditProfile: React.FC = () => {
                         className="w-full bg-[#121212] border border-[#333] text-white rounded-lg px-4 py-3 outline-none focus:border-[#EA4420] focus:ring-1 focus:ring-[#EA4420] transition-all text-sm placeholder-gray-500" 
                     />
 
-                    {/* WhatsApp */}
                     <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">WhatsApp (Ex: 5511999999999)</label>
                         <input 
@@ -183,7 +164,6 @@ export const EditProfile: React.FC = () => {
                         />
                     </div>
 
-                    {/* Graduação (Apenas visual conforme original) */}
                     <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Cordel / Graduação</label>
                         <div className="relative">
@@ -197,7 +177,6 @@ export const EditProfile: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Professor Responsável (Apenas visual conforme original) */}
                     <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Professor Responsável</label>
                         <div className="relative">

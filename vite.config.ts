@@ -11,6 +11,9 @@ export default defineConfig(({ mode }) => {
         allowedHosts: true,
         proxy: {
           '/api': 'http://localhost:3001'
+        },
+        fs: {
+          strict: false
         }
       },
       plugins: [react()],

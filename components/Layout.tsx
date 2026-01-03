@@ -72,21 +72,27 @@ const TRANSLATIONS = {
 export const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [user, setUser] = useState(() => {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
+  });
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const userStr = localStorage.getItem('user');
+      setUser(userStr ? JSON.parse(userStr) : null);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    if (!user && !location.pathname.startsWith('/login') && location.pathname !== '/') {
+      navigate('/login');
+    }
+  }, [user, location.pathname, navigate]);
   
   // Notification State
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [hasUnread, setHasUnread] = useState(false);
-  const notificationPanelRef = useRef<HTMLDivElement>(null);
-  const bellRef = useRef<HTMLButtonElement>(null);
-
-  // Language State
-  const [currentLang, setCurrentLang] = useState(LANGUAGES[0]);
-  const [showLangMenu, setShowLangMenu] = useState(false);
-  const langMenuRef = useRef<HTMLDivElement>(null);
-
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
 
   const toggleTheme = () => {
     document.documentElement.classList.toggle('dark');

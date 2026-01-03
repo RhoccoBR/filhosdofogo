@@ -49,6 +49,14 @@ waitForPort = 3001
 localPort = 3001
 externalPort = 3001
 
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
+[[ports]]
+localPort = 5002
+externalPort = 3002
+
 [deployment]
 deploymentTarget = "static"
 build = ["npm", "run", "build"]

@@ -24,6 +24,7 @@ export const Login: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('user', JSON.stringify(data));
+        window.dispatchEvent(new Event('storage')); // Trigger update in Layout
         // Redirect based on role from database
         if (data.role === 'admin' || data.role === 'professor') {
           navigate('/app/dashboard');

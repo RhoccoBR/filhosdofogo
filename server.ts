@@ -24,7 +24,7 @@ app.get('/api/users', async (req, res) => {
   try {
     const result = await pool.query('SELECT id, name, email, role, rank FROM users');
     res.json(result.rows);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
@@ -33,7 +33,7 @@ app.get('/api/classes', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM classes');
     res.json(result.rows);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
@@ -43,7 +43,7 @@ app.post('/api/seed', async (req, res) => {
   try {
     await pool.query("INSERT INTO users (name, email, password_hash, role, rank) VALUES ('Admin', 'admin@filhosdofogo.com', 'hash', 'admin', 'Mestre') ON CONFLICT DO NOTHING");
     res.json({ message: 'Database seeded' });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });

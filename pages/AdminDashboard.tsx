@@ -193,8 +193,8 @@ export const AdminDashboard: React.FC = () => {
             <div className="w-full pl-4">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-black mb-3">Graduação Atual</p>
                 <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-full bg-opacity-10 ${getRankTextColor(currentRank)} bg-current`}>
-                        <span className="material-icons-round text-4xl">workspace_premium</span>
+                    <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 border-current bg-white/5 ${getRankTextColor(currentRank)} shadow-inner`}>
+                        <span className="material-icons-round text-3xl">workspace_premium</span>
                     </div>
                     <div>
                         <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">{currentRank}</h3>

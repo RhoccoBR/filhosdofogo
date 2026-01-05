@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRankGradient, getRankTextColor, getBaseRankGradient } from '../constants';
-import { DatabaseUser } from '../services/supabase';
+import { DatabaseUser, supabase } from '../services/supabase';
 
 const IMAGES = {
     avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuAL7JWgHDpOWfdv073mz8cCpa8E21QuITENA2iUk-1ACpQ1uqgz9xdb4RyH0cxvpEUIoTEQZlTSe_J2edrkvSQK_B1Tk8k5gLYZly4MdZlFaJ3hj1oWB7dhHt_3NUjPT4ugU1D8cDaK8w5oid35x1DBBE__s4mbNZ2Pj_2XakpSDJLNcvQUWHVHh9ZTFkQQzVQDp40EwzpyF5q41bW4ifiMAZEUfrIWHAYFVOccjw7XovnP6otBqkW9pWFIzaoqti0CVqVCuSNUKjM"

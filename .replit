@@ -37,3 +37,10 @@ externalPort = 80
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
 publicDir = "dist"
+
+[userenv]
+
+[userenv.shared]
+GEMINI_API_KEY = "AIzaSyDG5hfbZuBpfZ3D8y3AeVAZJpWK1uUvjt0"
+VITE_SUPABASE_URL = "https://uqeqhargruywphjbzbds.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZXFoYXJncnV5d3BoamJ6YmRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NjYxMjUsImV4cCI6MjA4MzA0MjEyNX0.pBY00QmMHAiArV3cJtJVF06SwBMVlSHIsS6UzcP5dvc"

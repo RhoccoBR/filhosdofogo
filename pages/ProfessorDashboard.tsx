@@ -1,6 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRankGradient, getRankTextColor } from '../constants';
+import { DatabaseUser } from '../services/supabase';
 
 const IMAGES = {
     avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDkimL0WxBc6r78Q1tkzfmPQ5-7VcQAUjgSCS1zsxF_4mE6iXwQVm2dfX6rqbpbuVSFdJbSm1rUoSIEKZEgXPH2yWrM6Wcr07J7WtWMNd4lMumoUJeRkrzsGJTOKfiRyA25t-kwuofh-q6kkLHxhdNoNE47d9CazYvWj_SECjEt7Ih3HjKurSyZbxUlAd6uifMxPRwhlUjq_cFWi5B8uJjK8YzhqGjT_kAAGkR5cVv9Qs67dxYx0CscH6ZRQGvY_TgR_2l5ye4CSBM"
@@ -29,7 +30,21 @@ export const ProfessorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const receiptInputRef = useRef<HTMLInputElement>(null);
-  const currentRank = "Cordel Azul (Professor)";
+  const [currentUser, setCurrentUser] = useState<DatabaseUser | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('fdf_user');
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Erro ao ler usuário", e);
+      }
+    }
+  }, []);
+
+  const currentRank = currentUser?.rank || "Cordel Azul (Professor)";
+  const profName = currentUser?.name || "Lion";
 
   // Attendance Modal State
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
@@ -120,7 +135,7 @@ export const ProfessorDashboard: React.FC = () => {
                     Painel do Professor
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2 drop-shadow-md">
-                    Olá, Lion!
+                    Olá, {profName}!
                 </h2>
                 <p className="text-indigo-200 text-sm sm:text-base font-medium max-w-md leading-relaxed">
                     Bem-vindo de volta. Prepare-se para mais um dia de treinos e evolução.
@@ -159,15 +174,20 @@ export const ProfessorDashboard: React.FC = () => {
 
       {/* Stats Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="relative bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center overflow-hidden">
+        <div className="relative bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 flex items-center overflow-hidden transition-all hover:scale-[1.02] hover:shadow-xl">
             {/* Dynamic Stripe based on Rank */}
-            <div className={`absolute left-0 top-0 bottom-0 w-3 rounded-l-xl ${getRankGradient(currentRank)}`}></div>
+            <div className={`absolute left-0 top-0 bottom-0 w-3 rounded-l-xl ${getRankGradient(currentRank)} shadow-[2px_0_10px_rgba(0,0,0,0.1)]`}></div>
             
-            <div className="w-full pl-2">
-                <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2 ml-4">Graduação Atual</p>
-                <div className="flex items-center justify-center gap-3 w-full">
-                    <span className={`material-icons-round text-3xl ${getRankTextColor(currentRank)}`}>verified_user</span>
-                    <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{currentRank}</h3>
+            <div className="w-full pl-4">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-black mb-3">Graduação Atual</p>
+                <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-full bg-opacity-10 ${getRankTextColor(currentRank)} bg-current`}>
+                        <span className="material-icons-round text-4xl">workspace_premium</span>
+                    </div>
+                    <div>
+                        <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">{currentRank}</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Reconhecimento oficial do Grupo Filhos do Fogo</p>
+                    </div>
                 </div>
             </div>
         </div>

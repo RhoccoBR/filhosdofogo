@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getRankGradient, getRankTextColor } from '../constants';
+import { DatabaseUser } from '../services/supabase';
 
 const IMAGES = {
     avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuAL7JWgHDpOWfdv073mz8cCpa8E21QuITENA2iUk-1ACpQ1uqgz9xdb4RyH0cxvpEUIoTEQZlTSe_J2edrkvSQK_B1Tk8k5gLYZly4MdZlFaJ3hj1oWB7dhHt_3NUjPT4ugU1D8cDaK8w5oid35x1DBBE__s4mbNZ2Pj_2XakpSDJLNcvQUWHVHh9ZTFkQQzVQDp40EwzpyF5q41bW4ifiMAZEUfrIWHAYFVOccjw7XovnP6otBqkW9pWFIzaoqti0CVqVCuSNUKjM"
@@ -11,12 +12,24 @@ const PIX_KEY = "00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-4266141
 export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const receiptInputRef = useRef<HTMLInputElement>(null);
+  const [currentUser, setCurrentUser] = useState<DatabaseUser | null>(null);
   
-  // Dados Mockados
+  useEffect(() => {
+    const storedUser = localStorage.getItem('fdf_user');
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Erro ao ler usuário", e);
+      }
+    }
+  }, []);
+
+  // Dados Mockados complementares
   const student = {
-      name: "Paulinho",
-      rank: "Cordel Amarelo ponta Azul",
-      professor: "Lion",
+      name: currentUser?.name || "Aluno",
+      rank: currentUser?.rank || "Cordel Cinza (Iniciante)",
+      professor: currentUser?.professor || "Não atribuído",
       financialStatus: "pending",
       nextEvaluation: "R$ 0,00",
       nextClass: { date: "Hoje", time: "20:30", location: "Academia do Cláudio" },
@@ -147,15 +160,20 @@ export const StudentDashboard: React.FC = () => {
 
       {/* Stats Grid (Rank & Evaluation) */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="relative bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex items-center overflow-hidden">
+        <div className="relative bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 flex items-center overflow-hidden transition-all hover:scale-[1.02] hover:shadow-xl">
             {/* Dynamic Stripe based on Rank */}
-            <div className={`absolute left-0 top-0 bottom-0 w-3 rounded-l-xl ${getRankGradient(student.rank)}`}></div>
+            <div className={`absolute left-0 top-0 bottom-0 w-3 rounded-l-xl ${getRankGradient(student.rank)} shadow-[2px_0_10px_rgba(0,0,0,0.1)]`}></div>
             
-            <div className="w-full pl-2">
-                <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2 ml-4">Graduação Atual</p>
-                <div className="flex items-center justify-center gap-3 w-full">
-                    <span className={`material-icons-round text-3xl ${getRankTextColor(student.rank)}`}>verified_user</span>
-                    <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">{student.rank}</h3>
+            <div className="w-full pl-4">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-black mb-3">Graduação Atual</p>
+                <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-full bg-opacity-10 ${getRankTextColor(student.rank)} bg-current`}>
+                        <span className="material-icons-round text-4xl">workspace_premium</span>
+                    </div>
+                    <div>
+                        <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">{student.rank}</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Reconhecimento oficial do Grupo Filhos do Fogo</p>
+                    </div>
                 </div>
             </div>
         </div>

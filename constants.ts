@@ -33,101 +33,84 @@ export const getRankGradient = (rankName: string): string => {
     const baseRank = parts[0].trim();
     const tipDescription = parts.length > 1 ? parts[1].trim() : '';
 
-    // Detectar tipo da ponta para condicional
-    let tipType = '';
+    // Se tiver pontinha (parte inferior)
     if (tipDescription) {
-        if (tipDescription.includes('verde') && tipDescription.includes('amarelo')) tipType = 'verde-amarelo';
-        else if (tipDescription.includes('verde')) tipType = 'verde';
-        else if (tipDescription.includes('amarelo')) tipType = 'amarelo';
-        else if (tipDescription.includes('azul')) tipType = 'azul';
-        else if (tipDescription.includes('branco')) tipType = 'branco';
+        let tipColor = 'from-gray-500 to-gray-700';
+        if (tipDescription.includes('verde')) tipColor = 'from-green-600 to-green-600';
+        else if (tipDescription.includes('amarelo')) tipColor = 'from-yellow-400 to-yellow-400';
+        else if (tipDescription.includes('azul')) tipColor = 'from-blue-600 to-blue-600';
+        else if (tipDescription.includes('branco')) tipColor = 'from-white to-white';
+        
+        return tipColor; // Retornamos a cor da ponta para a tarja inferior
     }
 
     // --- MESTRES / MESTRANDOS ---
-
-    // Mestrando (Verde, Amarelo, Azul, Branco)
     if (baseRank.includes('mestrando') || (baseRank.includes('verde') && baseRank.includes('amarelo') && baseRank.includes('azul'))) {
         return 'bg-gradient-to-b from-green-600 via-yellow-400 to-blue-600';
     }
 
-    // Cordel Branco (Grão-Mestre) ou Níveis de Mestre (com Branco)
-    if (baseRank.includes('branco') && !baseRank.includes('iniciante')) {
-        // Mestre III (Azul e Branco)
-        if (baseRank.includes('azul')) {
-            // Azul com ponta
-            if (tipType === 'verde') return 'bg-gradient-to-b from-blue-600 via-white to-green-600';
-            if (tipType === 'amarelo') return 'bg-gradient-to-b from-blue-600 via-white to-yellow-400';
-            // Padrão Azul e Branco
-            return 'bg-gradient-to-b from-blue-600 via-blue-600 to-white'; 
-        }
-        // Mestre I (Verde e Branco)
-        if (baseRank.includes('verde')) {
-             return 'bg-gradient-to-b from-green-600 via-green-600 to-white';
-        }
-        // Mestre II (Amarelo e Branco)
-        if (baseRank.includes('amarelo')) {
-             return 'bg-gradient-to-b from-yellow-400 via-yellow-400 to-white';
-        }
-        // Vermelho e Branco (se houver)
-        if (baseRank.includes('vermelho')) {
-             return 'bg-gradient-to-b from-red-600 via-red-600 to-white';
-        }
-        
-        // Apenas Branco (Grão-Mestre)
-        return 'bg-gradient-to-b from-gray-100 via-white to-gray-200';
-    }
-
-    // --- CORES DUPLAS (INTERMEDIÁRIAS) ---
-    
-    // Verde e Amarelo
+    // --- CORES DUPLAS (INTERMEDIÁRIAS) - 50/50 ---
     if (baseRank.includes('verde') && baseRank.includes('amarelo')) {
-        if (tipType === 'azul') return 'bg-gradient-to-b from-green-600 via-yellow-400 to-blue-600';
-        if (tipType === 'verde') return 'bg-gradient-to-b from-green-600 via-yellow-400 to-green-600';
-        if (tipType === 'amarelo') return 'bg-gradient-to-b from-green-600 via-yellow-400 to-yellow-400';
-        return 'bg-gradient-to-b from-green-600 to-yellow-400';
+        return 'bg-gradient-to-b from-green-600 from-50% to-yellow-400 to-50%';
     }
-
-    // Amarelo e Azul
     if (baseRank.includes('amarelo') && baseRank.includes('azul')) {
-        if (tipType === 'amarelo') return 'bg-gradient-to-b from-yellow-400 via-blue-600 to-yellow-400';
-        if (tipType === 'azul') return 'bg-gradient-to-b from-yellow-400 via-blue-600 to-blue-600';
-        return 'bg-gradient-to-b from-yellow-400 to-blue-600';
+        return 'bg-gradient-to-b from-yellow-400 from-50% to-blue-600 to-50%';
     }
-
-    // Verde e Azul
     if (baseRank.includes('verde') && baseRank.includes('azul')) {
-         return 'bg-gradient-to-b from-green-600 to-blue-600';
+        return 'bg-gradient-to-b from-green-600 from-50% to-blue-600 to-50%';
+    }
+    if (baseRank.includes('azul') && baseRank.includes('branco')) {
+        return 'bg-gradient-to-b from-blue-600 from-50% to-white to-50%';
+    }
+    if (baseRank.includes('verde') && baseRank.includes('branco')) {
+        return 'bg-gradient-to-b from-green-600 from-50% to-white to-50%';
+    }
+    if (baseRank.includes('amarelo') && baseRank.includes('branco')) {
+        return 'bg-gradient-to-b from-yellow-400 from-50% to-white to-50%';
     }
 
-    // --- CORES SÓLIDAS (COM PONTAS) ---
+    // --- CORES SÓLIDAS ---
+    if (baseRank.includes('verde')) return 'bg-green-600';
+    if (baseRank.includes('amarelo')) return 'bg-yellow-400';
+    if (baseRank.includes('azul')) return 'bg-blue-600';
+    if (baseRank.includes('cinza')) return 'bg-gray-400';
+    if (baseRank.includes('branco')) return 'bg-white';
 
-    // Verde
-    if (baseRank.includes('verde')) {
-        if (tipType === 'amarelo') return 'bg-gradient-to-b from-green-600 via-green-600 to-yellow-400';
-        if (tipType === 'azul') return 'bg-gradient-to-b from-green-600 via-green-600 to-blue-600';
-        return 'bg-gradient-to-b from-green-500 to-green-700';
+    return 'bg-gray-500';
+};
+
+// Nova função para pegar apenas a cor da base (parte de cima)
+export const getBaseRankGradient = (rankName: string): string => {
+    const lower = rankName.toLowerCase();
+    const parts = lower.split('ponta');
+    const baseRank = parts[0].trim();
+
+    if (baseRank.includes('verde') && baseRank.includes('amarelo')) {
+        return 'bg-gradient-to-b from-green-600 from-50% to-yellow-400 to-50%';
     }
-
-    // Amarelo
-    if (baseRank.includes('amarelo')) {
-        if (tipType === 'verde') return 'bg-gradient-to-b from-yellow-400 via-yellow-400 to-green-600';
-        if (tipType === 'azul') return 'bg-gradient-to-b from-yellow-400 via-yellow-400 to-blue-600';
-        return 'bg-gradient-to-b from-yellow-400 to-yellow-600';
+    if (baseRank.includes('amarelo') && baseRank.includes('azul')) {
+        return 'bg-gradient-to-b from-yellow-400 from-50% to-blue-600 to-50%';
     }
-
-    // Azul
-    if (baseRank.includes('azul')) {
-        if (tipType === 'verde-amarelo') return 'bg-gradient-to-b from-blue-600 via-blue-600 to-yellow-400'; // Aproximação visual
-        if (tipType === 'verde') return 'bg-gradient-to-b from-blue-600 via-blue-600 to-green-600';
-        if (tipType === 'amarelo') return 'bg-gradient-to-b from-blue-600 via-blue-600 to-yellow-400';
-        return 'bg-gradient-to-b from-blue-500 to-blue-700';
+    if (baseRank.includes('verde') && baseRank.includes('azul')) {
+        return 'bg-gradient-to-b from-green-600 from-50% to-blue-600 to-50%';
     }
-
-    // Cinza / Iniciante
-    if (baseRank.includes('cinza')) return 'bg-gradient-to-b from-gray-400 to-gray-600';
-
-    // Fallback padrão
-    return 'bg-gradient-to-b from-gray-500 to-gray-700';
+    if (baseRank.includes('azul') && baseRank.includes('branco')) {
+        return 'bg-gradient-to-b from-blue-600 from-50% to-white to-50%';
+    }
+    if (baseRank.includes('verde') && baseRank.includes('branco')) {
+        return 'bg-gradient-to-b from-green-600 from-50% to-white to-50%';
+    }
+    if (baseRank.includes('amarelo') && baseRank.includes('branco')) {
+        return 'bg-gradient-to-b from-yellow-400 from-50% to-white to-50%';
+    }
+    
+    if (baseRank.includes('verde')) return 'bg-green-600';
+    if (baseRank.includes('amarelo')) return 'bg-yellow-400';
+    if (baseRank.includes('azul')) return 'bg-blue-600';
+    if (baseRank.includes('cinza')) return 'bg-gray-400';
+    if (baseRank.includes('branco')) return 'bg-white';
+    
+    return 'bg-gray-500';
 };
 
 export const getRankTextColor = (rankName: string): string => {

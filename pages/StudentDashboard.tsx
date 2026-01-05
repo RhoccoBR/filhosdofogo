@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getRankGradient, getRankTextColor } from '../constants';
+import { getRankGradient, getRankTextColor, getBaseRankGradient } from '../constants';
 import { DatabaseUser } from '../services/supabase';
 
 const IMAGES = {
@@ -162,7 +162,12 @@ export const StudentDashboard: React.FC = () => {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="relative bg-surface-light dark:bg-surface-dark p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 flex items-center overflow-hidden transition-all hover:scale-[1.02] hover:shadow-xl">
             {/* Dynamic Stripe based on Rank */}
-            <div className={`absolute left-0 top-0 bottom-0 w-3 rounded-l-xl ${getRankGradient(student.rank)} shadow-[2px_0_10px_rgba(0,0,0,0.1)]`}></div>
+            <div className="absolute left-0 top-0 bottom-0 w-3 rounded-l-xl overflow-hidden flex flex-col shadow-[2px_0_10px_rgba(0,0,0,0.1)]">
+                <div className={`flex-1 ${getBaseRankGradient(student.rank)}`}></div>
+                {student.rank.toLowerCase().includes('ponta') && (
+                    <div className={`h-1/4 ${getRankGradient(student.rank)}`}></div>
+                )}
+            </div>
             
             <div className="w-full pl-4">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-black mb-3">Graduação Atual</p>

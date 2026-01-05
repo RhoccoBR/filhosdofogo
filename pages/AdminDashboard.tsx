@@ -121,9 +121,9 @@ export const AdminDashboard: React.FC = () => {
             </div>
             
             <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left pt-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-md text-[11px] font-bold uppercase tracking-widest text-orange-100 mb-3 shadow-sm">
-                    <span className="material-icons-round text-sm text-orange-300">security</span>
-                    Painel Mestre
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/30 backdrop-blur-md text-[11px] font-bold uppercase tracking-widest text-yellow-200 mb-3 shadow-sm">
+                    <span className="material-icons-round text-sm text-yellow-400">workspace_premium</span>
+                    Painel Mestre (Dourado)
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2 drop-shadow-md">
                     Olá, {adminName}!

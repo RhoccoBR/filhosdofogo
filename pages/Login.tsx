@@ -89,6 +89,11 @@ export const Login: React.FC = () => {
                throw new Error('Senha inválida.');
           }
           
+          // Validação de senha simples para teste (em produção usar hash)
+          if (user.password && user.password !== password) {
+              throw new Error('Senha incorreta.');
+          }
+          
           localStorage.setItem('fdf_user', JSON.stringify(user));
           navigate('/app/dashboard');
 

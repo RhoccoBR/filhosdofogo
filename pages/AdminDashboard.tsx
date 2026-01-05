@@ -96,8 +96,46 @@ export const AdminDashboard: React.FC = () => {
       setIsAttendanceModalOpen(false);
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        
+        const { error } = await supabase
+          .from('users')
+          .update({ avatar: base64String })
+          .eq('email', currentUser.email);
+
+        if (error) throw error;
+
+        const updatedUser = { ...currentUser, avatar: base64String };
+        localStorage.setItem('fdf_user', JSON.stringify(updatedUser));
+        setCurrentUser(updatedUser);
+        
+        alert("Foto de perfil atualizada!");
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error("Erro ao upload avatar:", err);
+      alert("Erro ao atualizar foto.");
+    }
+  };
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
+      <input 
+        type="file" 
+        ref={avatarInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={handleAvatarUpload}
+      />
       {/* Hero Card - Admin Style */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#450a0a] via-[#7f1d1d] to-[#1e1b4b] shadow-2xl border border-red-500/20 isolate group">
         <div className="absolute -top-[100px] -right-[50px] w-80 h-80 bg-red-500/30 rounded-full blur-[100px] pointer-events-none mix-blend-screen"></div>
@@ -109,9 +147,15 @@ export const AdminDashboard: React.FC = () => {
         
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 p-6 sm:p-8">
             <div className="relative shrink-0">
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-tr from-yellow-500 via-orange-500 to-red-600 shadow-xl shadow-red-900/60">
+                <div 
+                    className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-tr from-yellow-500 via-orange-500 to-red-600 shadow-xl shadow-red-900/60 cursor-pointer group/avatar"
+                    onClick={() => avatarInputRef.current?.click()}
+                >
                     <div className="w-full h-full rounded-full border-4 border-[#450a0a] overflow-hidden bg-gray-800 relative z-10">
-                        <img alt="Admin Avatar" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" src={IMAGES.adminAvatar} />
+                        <img alt="Admin Avatar" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" src={currentUser?.avatar || IMAGES.adminAvatar} />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                            <span className="material-icons-round text-white text-2xl">photo_camera</span>
+                        </div>
                     </div>
                 </div>
                 <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 z-20 flex h-6 w-6 items-center justify-center">

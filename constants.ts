@@ -33,15 +33,13 @@ export const getRankGradient = (rankName: string): string => {
     const baseRank = parts[0].trim();
     const tipDescription = parts.length > 1 ? parts[1].trim() : '';
 
-    // Se tiver pontinha (parte inferior)
+    // Se tiver pontinha (cor da tarja inferior sólida)
     if (tipDescription) {
-        let tipColor = 'from-gray-500 to-gray-700';
-        if (tipDescription.includes('verde')) tipColor = 'from-green-600 to-green-600';
-        else if (tipDescription.includes('amarelo')) tipColor = 'from-yellow-400 to-yellow-400';
-        else if (tipDescription.includes('azul')) tipColor = 'from-blue-600 to-blue-600';
-        else if (tipDescription.includes('branco')) tipColor = 'from-white to-white';
-        
-        return tipColor; // Retornamos a cor da ponta para a tarja inferior
+        if (tipDescription.includes('verde')) return 'bg-green-600';
+        if (tipDescription.includes('amarelo')) return 'bg-yellow-400';
+        if (tipDescription.includes('azul')) return 'bg-blue-600';
+        if (tipDescription.includes('branco')) return 'bg-white';
+        return 'bg-gray-500';
     }
 
     // --- MESTRES / MESTRANDOS ---
@@ -49,24 +47,24 @@ export const getRankGradient = (rankName: string): string => {
         return 'bg-gradient-to-b from-green-600 via-yellow-400 to-blue-600';
     }
 
-    // --- CORES DUPLAS (INTERMEDIÁRIAS) - 50/50 ---
+    // --- CORES DUPLAS (INTERMEDIÁRIAS) - Degrade ---
     if (baseRank.includes('verde') && baseRank.includes('amarelo')) {
-        return 'bg-gradient-to-b from-green-600 from-50% to-yellow-400 to-50%';
+        return 'bg-gradient-to-b from-green-600 to-yellow-400';
     }
     if (baseRank.includes('amarelo') && baseRank.includes('azul')) {
-        return 'bg-gradient-to-b from-yellow-400 from-50% to-blue-600 to-50%';
+        return 'bg-gradient-to-b from-yellow-400 to-blue-600';
     }
     if (baseRank.includes('verde') && baseRank.includes('azul')) {
-        return 'bg-gradient-to-b from-green-600 from-50% to-blue-600 to-50%';
+        return 'bg-gradient-to-b from-green-600 to-blue-600';
     }
     if (baseRank.includes('azul') && baseRank.includes('branco')) {
-        return 'bg-gradient-to-b from-blue-600 from-50% to-white to-50%';
+        return 'bg-gradient-to-b from-blue-600 to-white';
     }
     if (baseRank.includes('verde') && baseRank.includes('branco')) {
-        return 'bg-gradient-to-b from-green-600 from-50% to-white to-50%';
+        return 'bg-gradient-to-b from-green-600 to-white';
     }
     if (baseRank.includes('amarelo') && baseRank.includes('branco')) {
-        return 'bg-gradient-to-b from-yellow-400 from-50% to-white to-50%';
+        return 'bg-gradient-to-b from-yellow-400 to-white';
     }
 
     // --- CORES SÓLIDAS ---
@@ -79,29 +77,28 @@ export const getRankGradient = (rankName: string): string => {
     return 'bg-gray-500';
 };
 
-// Nova função para pegar apenas a cor da base (parte de cima)
 export const getBaseRankGradient = (rankName: string): string => {
     const lower = rankName.toLowerCase();
     const parts = lower.split('ponta');
     const baseRank = parts[0].trim();
 
     if (baseRank.includes('verde') && baseRank.includes('amarelo')) {
-        return 'bg-gradient-to-b from-green-600 from-50% to-yellow-400 to-50%';
+        return 'bg-gradient-to-b from-green-600 to-yellow-400';
     }
     if (baseRank.includes('amarelo') && baseRank.includes('azul')) {
-        return 'bg-gradient-to-b from-yellow-400 from-50% to-blue-600 to-50%';
+        return 'bg-gradient-to-b from-yellow-400 to-blue-600';
     }
     if (baseRank.includes('verde') && baseRank.includes('azul')) {
-        return 'bg-gradient-to-b from-green-600 from-50% to-blue-600 to-50%';
+        return 'bg-gradient-to-b from-green-600 to-blue-600';
     }
     if (baseRank.includes('azul') && baseRank.includes('branco')) {
-        return 'bg-gradient-to-b from-blue-600 from-50% to-white to-50%';
+        return 'bg-gradient-to-b from-blue-600 to-white';
     }
     if (baseRank.includes('verde') && baseRank.includes('branco')) {
-        return 'bg-gradient-to-b from-green-600 from-50% to-white to-50%';
+        return 'bg-gradient-to-b from-green-600 to-white';
     }
     if (baseRank.includes('amarelo') && baseRank.includes('branco')) {
-        return 'bg-gradient-to-b from-yellow-400 from-50% to-white to-50%';
+        return 'bg-gradient-to-b from-yellow-400 to-white';
     }
     
     if (baseRank.includes('verde')) return 'bg-green-600';
